@@ -2363,6 +2363,34 @@ NOEXPORT char *parse_service_option(CMD cmd, SERVICE_OPTIONS **section_ptr,
         break;
     }
 
+    /* protocolMailerHELO */
+    switch(cmd) {
+    case CMD_SET_DEFAULTS:
+        section->protocol_mailerHELO=str_dup_detached("locahost");
+        break;
+    case CMD_SET_COPY:
+        section->protocol_mailerHELO=
+            str_dup_detached(new_service_options.protocol_mailerHELO);
+        break;
+    case CMD_FREE:
+        str_free(section->protocol_mailerHELO);
+        break;
+    case CMD_SET_VALUE:
+        if(strcasecmp(opt, "protocolMailerHELO"))
+            break;
+        str_free(section->protocol_mailerHELO);
+        section->protocol_mailerHELO=str_dup_detached(arg);
+        return NULL; /* OK */
+    case CMD_INITIALIZE:
+        break;
+    case CMD_PRINT_DEFAULTS:
+        break;
+    case CMD_PRINT_HELP:
+        s_log(LOG_NOTICE, "%-22s = name to use for protocol mailer HELO",
+            "protocolMailerHELO");
+        break;
+    }
+
     /* protocolAuthentication */
     switch(cmd) {
     case CMD_SET_DEFAULTS:

@@ -272,6 +272,7 @@ typedef struct service_options_struct {
     char *protocol_username;
     char *protocol_password;
     char *protocol_authentication;
+    char *protocol_mailerHELO;
 
         /* service-specific data for ui_*.c */
 #ifdef USE_WIN32

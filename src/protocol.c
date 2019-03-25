@@ -57,7 +57,7 @@ NOEXPORT char *pgsql_server(CLI *, SERVICE_OPTIONS *, const PHASE);
 NOEXPORT char *smtp_client(CLI *, SERVICE_OPTIONS *, const PHASE);
 NOEXPORT void smtp_client_negotiate(CLI *);
 NOEXPORT void smtp_client_plain(CLI *, const char *, const char *);
-NOEXPORT void smtp_client_login(CLI *, const char *, const char *);
+NOEXPORT void smtp_client_login(CLI *, const char *, const char *, const char *);
 NOEXPORT char *smtp_server(CLI *, SERVICE_OPTIONS *, const PHASE);
 NOEXPORT char *pop3_client(CLI *, SERVICE_OPTIONS *, const PHASE);
 NOEXPORT char *pop3_server(CLI *, SERVICE_OPTIONS *, const PHASE);
@@ -713,7 +713,7 @@ NOEXPORT char *smtp_client(CLI *c, SERVICE_OPTIONS *opt, const PHASE phase) {
         if(opt->protocol_username && opt->protocol_password) {
             if(!strcasecmp(c->opt->protocol_authentication, "LOGIN"))
                 smtp_client_login(c,
-                    opt->protocol_username, opt->protocol_password);
+                    opt->protocol_username, opt->protocol_password, opt->protocol_mailerHELO);
             else /* use PLAIN by default */
                 smtp_client_plain(c,
                     opt->protocol_username, opt->protocol_password);
@@ -771,6 +771,7 @@ NOEXPORT void smtp_client_plain(CLI *c, const char *user, const char *pass) {
         str_free(line);
         throw_exception(c, 1);
     }
+
     str_free(line);
     line=str_printf("AUTH PLAIN %s", encoded);
     str_free(encoded);
@@ -786,8 +787,12 @@ NOEXPORT void smtp_client_plain(CLI *c, const char *user, const char *pass) {
     str_free(line);
 }
 
-NOEXPORT void smtp_client_login(CLI *c, const char *user, const char *pass) {
+NOEXPORT void smtp_client_login(CLI *c, const char *user, const char *pass, const char *mailerHELO) {
     char *line, *encoded;
+
+    line = str_printf("HELO %s", mailerHELO);
+    ssl_putline(c, line);
+    line=ssl_getline(c);
 
     ssl_putline(c, "AUTH LOGIN");
     line=ssl_getline(c);
